@@ -1,0 +1,72 @@
+= Spring in Action 2nd
+
+
+== Links
+
+
+- https://spring.io/projects/spring-security[Spring Security]
+- https://github.com/havinhphu188/spring-security-in-action-source[Book Source Code]
+
+=== Chapter 1 Highlighted notes
+
+****
+- Spring Security, however, doesn’t automatically secure your application. And it’s not some kind of magic panacea that guarantees a vulnerability-free app. Developers need to understand how to configure and customize Spring Security around the needs of their applications. How to do this depends on many factors, from the functional requirements to the architecture.
+
+- Based on configurations, you write Spring Security components that intercept the requests and that ensure whoever makes the requests has permission to access protected resources
+
+- We classify data as “at rest” or “in transition.” In this context, data at rest refers to data in computer storage or, in other words, persisted data. Data in transition applies to all the data that’s exchanged from one point to another. Different security measures should, therefore, be enforced, depending on the type of data.
+****
+
+
+=== Chapter 2 Highlighted notes
+
+[source, bash]
+----
+echo -n user:{{temp_spring_boot_generated}} | base64
+curl -v -H "Authorization: Basic generated_above_token" localhost:8080/hello
+# enable https
+openssl req -newkey rsa:2048 -x509 -keyout key.pem -out cert.pem -days 365
+openssl pkcs12 -export -in cert.pem -inkey key.pem -out certificate.p12 -name "certificate"
+#
+winpty openssl req -newkey rsa:2048 -x509 -keyout key.pem -out cert.pem -days 365
+winpty openssl pkcs12 -export -in cert.pem -inkey key.pem -out certificate.p12 -name "certificate"
+# -k for skip testing auth of the certificate
+curl -k -u user:93a01cf0-794b-4b98-86ef-54860f36f7f3  https://localhost:8080/hello
+----
+
+[source,properties]
+----
+server.ssl.key-store-type=PKCS12
+server.ssl.key-store=classpath:certificate.p12
+server.ssl.key-store-password=12345
+----
+
+Six main actions
+
+1. The authentication filter delegates the authentication request to the authentication manager and, based on the response, configures the security context.
+
+2. The authentication manager uses the authentication provider to process authentication.
+
+3. The authentication provider implements the authentication logic.
+
+4. The user details service implements user management responsibility, which the authentication provider uses in the authentication logic.
+
+5. The password encoder implements password management, which the authentication provider uses in the authentication logic.
+
+6. The security context keeps the authentication data after the authentication process.
+
+
+.Without PasswordEncoder
+[source,bash]
+----
+curl -u john:12345 http://localhost:8080/hello
+
+java.lang.IllegalArgumentException:
+There is no PasswordEncoder mapped for the id "null"
+    at org.springframework.security.crypto.password.DelegatingPasswordEncoder$
+UnmappedIdPasswordEncoder.matches(DelegatingPasswordEncoder.java:289)
+~[spring-security-crypto-6.0.0.jar:6.0.0]
+    at org.springframework.security.crypto.password.DelegatingPasswordEncoder.matches(
+DelegatingPasswordEncoder.java:237)
+~[spring-security-crypto-6.0.0.jar:6.0.0]
+----
